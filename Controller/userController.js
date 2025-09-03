@@ -1,6 +1,6 @@
 import userModel from "../Model/userModel.js";
 import { validationSchema } from "../Validation/zodScheme.js";
-import { ZodError } from "zod";
+import { success, ZodError } from "zod";
 import { hashing } from "../Validation/passwordHashing.js";
 
 export const showALLUsers = async(req,res) => {
@@ -105,3 +105,27 @@ export const updateUser = async(req,res) => {
             })
     }
 } 
+
+export const deleteUser = async(req,res) => {
+    try{
+        const {id} = req.params;
+        const deleteUserData = await userModel.findByIdAndDelete(id);
+
+        if(!deleteUserData) {
+           return res.status(500).json({
+                success: false,
+                message: "User data wasn't deleted"
+            })
+        } else{
+            res.status(200).json({
+                success: true,
+                message: "User data deleted successfully"
+            })
+        }
+    }catch(error){
+         res.status(500).json({
+                success: false,
+                message: "Invalid Server Request"
+            })
+    }
+}
