@@ -76,3 +76,32 @@ export const createNewUser = async(req,res) => {
         }
     }
 }
+
+export const updateUser = async(req,res) => {
+    try{
+        const {id} = req.params;
+        const updateInfo = await validationSchema.parseAsync(req.body);
+        if(updateInfo.password) {
+            updateInfo.password = await hashing(updateInfo.password);
+        }
+        const updatedData = await userModel.findByIdAndUpdate(id,{
+            ...updateInfo
+        }, {new: true}).select("-password")
+        if(updatedData) {
+            res.status(200).json({
+                success: true,
+                user: updatedData,
+            })
+        } else {
+            return  res.status(404).json({
+                success: false,
+                message: "Data wasn't updated"
+            })
+        }
+    } catch(error){
+         res.status(500).json({
+                success: false,
+                message: "Invalid Server Request"
+            })
+    }
+} 
