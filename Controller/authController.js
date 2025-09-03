@@ -45,3 +45,41 @@ export const registerUser = async(req,res) => {
         }
     }
 }
+
+export const loginUser = async(req,res) => {
+    try{
+        const loginReq = await validationSchema.parseAsync(req.body);
+        const registeredUser = await userModel.findOne(
+            {email: loginReq.email});
+        if(!registeredUser) 
+            {
+            return res.status(500).json({
+            success: false,
+            message: "Invalid Request"})
+            }
+        const validMember = await bcrypt.compare(loginReq.password, registeredUser.password);
+        if(!validMember) {
+          return res.status(401).json({
+            success: false,
+            message: "Invalid Password"})  
+        }
+        const token = jwt.sign({
+            email: registeredUser.email,
+            id: registeredUser._id
+        }, process.env.JWT_SECRET,
+    {expiresIn: "1h"} );
+    if(token) {
+        return res.status(200).json({
+            success: true,
+            message: "Login Successful",
+            user: registeredUser._id,
+            token: token
+        })
+    }
+    } catch(error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
