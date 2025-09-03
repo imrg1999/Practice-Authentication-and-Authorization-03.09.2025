@@ -83,3 +83,31 @@ export const loginUser = async(req,res) => {
         })
     }
 }
+
+export const userProfile = async(req,res) => {
+    try{
+        const profileData = await userModel.find(req.user._id).select("-password");
+        if(!profileData) {
+            return res.status(404).json({
+            success: false,
+            message: "Profile Could not be found"
+        })
+        } else {
+            res.status(200).json({
+                success: true,
+                data: {
+                    _id: profileData._id,
+                    name: profileData.name,
+                    email: profileData.email,
+                    contact: profileData.contact
+                }
+            })
+        }
+    } catch(error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+    
+}
